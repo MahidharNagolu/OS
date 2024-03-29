@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define FILENAME "employee_data.dat"
+#define RECORD_SIZE sizeof(Employee)
+
+// Employee structure
+typedef struct {
+    int id;
+    char name[50];
+    float salary;
+} Employee;
+
+// Function to add an employee record to the file
+void addEmployee() {
+    FILE *file = fopen(FILENAME, "ab");
+    if (file == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    Employee emp;
+    printf("Enter employee ID: ");
+    scanf("%d", &emp.id);
+    printf("Enter employee name: ");
+    scanf("%s", emp.name);
+    printf("Enter employee salary: ");
+    scanf("%f", &emp.salary);
+
+    fseek(file, 0, SEEK_END); // Move the file pointer to the end
+    fwrite(&emp, RECORD_SIZE, 1, file); // Write employee record to file
+    fclose(file);
+}
+
+// Function to display all employee records from the file
+void displayEmployees() {
+    FILE *file = fopen(FILENAME, "rb");
+    if (file == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    Employee emp;
+    printf("\nEmployee Records:\n");
+    while (fread(&emp, RECORD_SIZE, 1, file)) {
+        printf("ID: %d, Name: %s, Salary: %.2f\n", emp.id, emp.name, emp.salary);
+    }
+
+    fclose(file);
+}
+
+int main() {
+    int choice;
+    do {
+        printf("\nEmployee Database Operations:\n");
+        printf("1. Add Employee\n");
+        printf("2. Display Employees\n");
+        printf("3. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                addEmployee();
+                break;
+            case 2:
+                displayEmployees();
+                break;
+            case 3:
+                printf("Exiting program.\n");
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 3);
+
+    return 0;
+}

@@ -1,0 +1,69 @@
+#include <stdio.h>
+
+struct Process {
+    int id;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+
+void shortestJobFirst(struct Process processes[], int n) {
+    int currentTime = 0;
+    int minIndex, temp;
+
+    for (int i = 0; i < n; i++) {
+        minIndex = i;
+        for (int j = i + 1; j < n; j++) {
+            if (processes[j].burst_time < processes[minIndex].burst_time && processes[j].arrival_time <= currentTime) {
+                minIndex = j;
+            }
+        }
+
+        // Swap processes[minIndex] and processes[i]
+        temp = processes[minIndex].burst_time;
+        processes[minIndex].burst_time = processes[i].burst_time;
+        processes[i].burst_time = temp;
+
+        temp = processes[minIndex].id;
+        processes[minIndex].id = processes[i].id;
+        processes[i].id = temp;
+
+        // Update current time
+        currentTime += processes[i].burst_time;
+
+        processes[i].completion_time = currentTime;
+        processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
+        processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
+    }
+}
+
+void displayResults(struct Process processes[], int n) {
+    printf("Process\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time\n");
+
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].id, processes[i].arrival_time, processes[i].burst_time,
+               processes[i].completion_time, processes[i].turnaround_time, processes[i].waiting_time);
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process processes[n];
+
+    printf("Enter arrival time and burst time for each process:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Process %d: ", i + 1);
+        scanf("%d %d", &processes[i].arrival_time, &processes[i].burst_time);
+        processes[i].id = i + 1;
+    }
+
+    shortestJobFirst(processes, n);
+    displayResults(processes, n);
+
+    return 0;
+}

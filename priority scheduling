@@ -1,0 +1,70 @@
+#include <stdio.h>
+
+struct Process {
+    int id;
+    int priority;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+
+void priorityScheduling(struct Process processes[], int n) {
+    int currentTime = 0;
+    int highestPriorityIndex, temp;
+
+    for (int i = 0; i < n; i++) {
+        highestPriorityIndex = i;
+        for (int j = i + 1; j < n; j++) {
+            if (processes[j].priority > processes[highestPriorityIndex].priority && processes[j].arrival_time <= currentTime) {
+                highestPriorityIndex = j;
+            }
+        }
+
+        // Swap processes[highestPriorityIndex] and processes[i]
+        temp = processes[highestPriorityIndex].priority;
+        processes[highestPriorityIndex].priority = processes[i].priority;
+        processes[i].priority = temp;
+
+        temp = processes[highestPriorityIndex].id;
+        processes[highestPriorityIndex].id = processes[i].id;
+        processes[i].id = temp;
+
+        // Update current time
+        currentTime += processes[i].burst_time;
+
+        processes[i].completion_time = currentTime;
+        processes[i].turnaround_time = processes[i].completion_time - processes[i].arrival_time;
+        processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
+    }
+}
+
+void displayResults(struct Process processes[], int n) {
+    printf("Process\tPriority\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time\n");
+
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].id, processes[i].priority, processes[i].arrival_time, 
+               processes[i].burst_time, processes[i].completion_time, processes[i].turnaround_time, processes[i].waiting_time);
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process processes[n];
+
+    printf("Enter priority, arrival time, and burst time for each process:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Process %d: ", i + 1);
+        scanf("%d %d %d", &processes[i].priority, &processes[i].arrival_time, &processes[i].burst_time);
+        processes[i].id = i + 1;
+    }
+
+    priorityScheduling(processes, n);
+    displayResults(processes, n);
+
+    return 0;
+}

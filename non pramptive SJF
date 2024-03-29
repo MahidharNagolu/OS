@@ -1,0 +1,72 @@
+#include <stdio.h>
+
+struct Process {
+    int id;
+    int arrival_time;
+    int burst_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+    int processed;
+};
+
+void nonPreemptiveSJF(struct Process processes[], int n) {
+    int currentTime = 0;
+    int completed = 0;
+    int shortestJobIndex;
+
+    while (completed < n) {
+        shortestJobIndex = -1;
+        int shortestBurst = __INT_MAX__;
+
+        for (int i = 0; i < n; i++) {
+            if (processes[i].arrival_time <= currentTime && processes[i].processed == 0) {
+                if (processes[i].burst_time < shortestBurst) {
+                    shortestBurst = processes[i].burst_time;
+                    shortestJobIndex = i;
+                }
+            }
+        }
+
+        if (shortestJobIndex == -1) {
+            currentTime++;
+        } else {
+            processes[shortestJobIndex].completion_time = currentTime + processes[shortestJobIndex].burst_time;
+            processes[shortestJobIndex].turnaround_time = processes[shortestJobIndex].completion_time - processes[shortestJobIndex].arrival_time;
+            processes[shortestJobIndex].waiting_time = processes[shortestJobIndex].turnaround_time - processes[shortestJobIndex].burst_time;
+            processes[shortestJobIndex].processed = 1;
+            currentTime += processes[shortestJobIndex].burst_time;
+            completed++;
+        }
+    }
+}
+
+void displayResults(struct Process processes[], int n) {
+    printf("Process\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time\n");
+
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].id, processes[i].arrival_time, processes[i].burst_time,
+               processes[i].completion_time, processes[i].turnaround_time, processes[i].waiting_time);
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process processes[n];
+
+    printf("Enter arrival time and burst time for each process:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Process %d: ", i + 1);
+        scanf("%d %d", &processes[i].arrival_time, &processes[i].burst_time);
+        processes[i].id = i + 1;
+        processes[i].processed = 0;
+    }
+
+    nonPreemptiveSJF(processes, n);
+    displayResults(processes, n);
+
+    return 0;
+}

@@ -1,0 +1,77 @@
+#include <stdio.h>
+
+struct Process {
+    int id;
+    int priority;
+    int arrival_time;
+    int burst_time;
+    int remaining_time;
+    int completion_time;
+    int turnaround_time;
+    int waiting_time;
+};
+
+void preemptivePriorityScheduling(struct Process processes[], int n) {
+    int currentTime = 0;
+    int completed = 0;
+    int currentProcess = -1;
+    
+    while (completed < n) {
+        int highestPriority = -1;
+        for (int i = 0; i < n; i++) {
+            if (processes[i].arrival_time <= currentTime && processes[i].remaining_time > 0) {
+                if (highestPriority == -1 || processes[i].priority < processes[highestPriority].priority) {
+                    highestPriority = i;
+                }
+            }
+        }
+        
+        if (highestPriority == -1) {
+            currentTime++;
+        } else {
+            if (currentProcess != -1 && currentProcess != highestPriority) {
+                printf("Time %d: Process %d preempted.\n", currentTime, currentProcess + 1);
+            }
+            currentProcess = highestPriority;
+            processes[currentProcess].remaining_time--;
+            currentTime++;
+            if (processes[currentProcess].remaining_time == 0) {
+                processes[currentProcess].completion_time = currentTime;
+                processes[currentProcess].turnaround_time = processes[currentProcess].completion_time - processes[currentProcess].arrival_time;
+                processes[currentProcess].waiting_time = processes[currentProcess].turnaround_time - processes[currentProcess].burst_time;
+                completed++;
+                currentProcess = -1;
+            }
+        }
+    }
+}
+
+void displayResults(struct Process processes[], int n) {
+    printf("Process\tPriority\tArrival Time\tBurst Time\tCompletion Time\tTurnaround Time\tWaiting Time\n");
+
+    for (int i = 0; i < n; i++) {
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].id, processes[i].priority, processes[i].arrival_time, 
+               processes[i].burst_time, processes[i].completion_time, processes[i].turnaround_time, processes[i].waiting_time);
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
+
+    struct Process processes[n];
+
+    printf("Enter priority, arrival time, and burst time for each process:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Process %d: ", i + 1);
+        scanf("%d %d %d", &processes[i].priority, &processes[i].arrival_time, &processes[i].burst_time);
+        processes[i].id = i + 1;
+        processes[i].remaining_time = processes[i].burst_time;
+    }
+
+    preemptivePriorityScheduling(processes, n);
+    displayResults(processes, n);
+
+    return 0;
+}
